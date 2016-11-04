@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package delete_file_extension;
+package br.gui.delete;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,7 +24,16 @@ public class Delete_file_extension {
      * @param extensions file extensions (do not use .)
      */
     public static void main(String[] extensions) {
-        removeDot(extensions);
+    	if (extensions.length == 0) {
+    		extensions = new String[]{"html","css"};
+    	} else {
+    		removeDot(extensions);
+    	}
+    	System.out.print("Extensions: ");
+    	for (String ext : extensions) {
+    		System.out.print(ext + " ");
+    	}
+    	System.out.print("\n");
         List<String> willDeleteFileList = findFilesFromHere(extensions);
         confirmDelete(willDeleteFileList);
     }
@@ -39,14 +48,21 @@ public class Delete_file_extension {
 
     private static List<String> findFilesFromHere(final String[] extensions) {
         final File executionFolder = new File(getExecutionPath());
+        if (!executionFolder.exists()) {
+        	System.out.println("Folder not found: " + executionFolder.getAbsolutePath());
+        	System.exit(1);
+        }
         return findRecursively(executionFolder, extensions, 0, new ArrayList<>());
     }
 
     private static String getExecutionPath() {
-        final String executionPath = System.getProperty("user.dir");
-        if (executionPath == null || executionPath.isEmpty()) {
-            throw new RuntimeException("Empty user.dir");
-        }
+//        final String executionPath = System.getProperty("user.dir");
+//        if (executionPath == null || executionPath.isEmpty()) {
+//            throw new RuntimeException("Empty user.dir");
+//        }
+    	final String executionPath = "C:\\Users\\Aluno";
+        
+        System.out.println("Path: " + executionPath);
         return executionPath;
     }
 
@@ -56,7 +72,20 @@ public class Delete_file_extension {
             final int depth,
             final List<String> foundFiles) {
         
+    	if (!folder.exists()) {
+    		System.out.println("Folder not found: " + folder.getAbsolutePath());
+    		return foundFiles;
+    	} else if (!folder.isDirectory()) {
+    		System.out.println("Not a directory: " + folder.getAbsolutePath());
+    		return foundFiles;
+    	}
+    	
         if (depth > MAX_DEPTH) return foundFiles;
+        
+        if (folder.listFiles() == null) {
+        	System.out.println("Error reading: " + folder.getAbsolutePath());
+        	return foundFiles;
+        }
         
         for (File file : folder.listFiles()){
             
@@ -86,9 +115,15 @@ public class Delete_file_extension {
             System.out.println("\t"+name);
         }
         System.out.println("Confirm? (y or n)");
-        String input = new Scanner(System.in).next();
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.next();
+        scanner.close();
         if (!"y".equals(input)) {
             System.exit(0);
+            return;
+        }
+        for (String name : willDeleteFileList) {
+        	new File(name).delete();
         }
     }
     
